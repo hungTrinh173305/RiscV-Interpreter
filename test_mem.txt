@@ -1,0 +1,14 @@
+## start[1] = 0x1000     # base address
+## start[2] = 0
+## start[3] = 0
+
+addi x4, x0, 0x11223344 # x4 = 0x11223344
+sw   x4, 0(x1)          # mem[0x1000] = 0x11223344
+
+lw   x5, 0(x1)          # x5 should be 0x11223344
+
+lb   x6, 0(x1)          # byte at offset 0: 0x44 (little-endian) -> 68
+lb   x7, 1(x1)          # byte at offset 1: 0x33 -> 51
+lb   x8, 2(x1)          # byte at offset 2: 0x22 -> 34
+lb   x9, 3(x1)          # byte at offset 3: 0x11 -> 17 (sign-extend)
+

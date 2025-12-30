@@ -1,0 +1,30 @@
+## start[1] = 10
+## start[2] = 20
+## start[3] = 0xFF
+
+# R-Type operations
+add x4, x1, x2          # 30
+sub x5, x2, x1          # 10
+and x6, x1, x3          # 10 & 255 = 10
+or  x7, x1, x3          # 10 | 255 = 255
+xor x8, x1, x2          # 10 ^ 20 = 30
+slt x9, x1, x2          # 1
+sll x10, x1, x2         # 10 << 20
+sra x11, x3, x1         # 255 >> 10
+
+# I-Type operations
+addi x12, x1, 15        # 25
+andi x13, x2, 7         # 20 & 7 = 4
+ori  x14, x1, 0xA       # 10 | 10 = 10
+xori x15, x2, 0x1       # 20 ^ 1 = 21
+slti x16, x1, 25        # 1
+
+# U-Type
+lui x17, 0x1F           # 0x1F000
+
+# Memory operations
+sw x4, 0(x1)            # Store 30 at address 10
+lw x18, 0(x1)           # Load back to x18
+sb x5, 4(x1)            # Store byte 10 at address 14
+lb x19, 4(x1)           # Load byte back
+

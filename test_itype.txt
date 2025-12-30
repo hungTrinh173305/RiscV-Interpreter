@@ -1,0 +1,11 @@
+## start[1] = 0x10      # 16
+## start[2] = 0xFF      # 255
+
+addi x3, x1, 5         # 21
+addi x4, x1, -3        # 13
+andi x5, x2, 0x0F      # 255 & 15 = 15
+ori  x6, x1, 0x0F      # 16 | 15 = 31
+xori x7, x2, 0xFF      # 255 ^ 255 = 0
+slti x8, x1, 0x20      # 16 < 32 -> 1
+slti x9, x1, 0x10      # 16 < 16 -> 0
+

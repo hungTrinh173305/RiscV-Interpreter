@@ -1,0 +1,14 @@
+## start[1] = 10
+## start[2] = 20
+## start[3] = -5
+
+add x4, x1, x2      # 10 + 20 = 30
+sub x5, x2, x1      # 20 - 10 = 10
+and x6, x1, x3      # 10 & -5
+or  x7, x1, x3      # 10 | -5
+xor x8, x1, x2      # 10 ^ 20
+slt x9, x1, x2      # 10 < 20 -> 1
+slt x10, x2, x1     # 20 < 10 -> 0
+sll x11, x1, x2     # 10 << 20
+sra x12, x3, x1     # -5 >> 10 (arith shift)
+
