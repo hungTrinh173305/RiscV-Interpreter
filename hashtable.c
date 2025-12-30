@@ -47,7 +47,9 @@ void ht_add(hashtable_t *table, int key, int value) {
 int ht_get(hashtable_t *table, int key) {
     // TODO: retrieve the value mapped to the given key.
     // If it does not exist, return 0
+    if (table == NULL) return 0;
     int target = hash(key, table->bucket_count);
+    if (table->buckets[target] == NULL) return 0;
     return ll_get(table->buckets[target], key);
 }
 

@@ -19,7 +19,7 @@ const int UNKNOWN_TYPE = 4;
  */
 static int get_op_type(char *op)
 {
-    const char *r_type_op[] = {"add", "sub", "and", "or", "xor", "slt", "sll", "sra"};
+    const char *r_type_op[] = {"add", "sub", "and", "or", "xor", "nor", "slt", "sll", "sra"};
     const char *i_type_op[] = {"addi", "andi", "ori", "xori", "slti"};
     const char *mem_type_op[] = {"lw", "lb", "sw", "sb"};
     const char *u_type_op[] = {"lui"};
@@ -79,6 +79,7 @@ const int RD_TEXT_SIZE = 5, RS1_TEXT_SIZE = 64, RS2_TEXT_SIZE = 64;
 
 // Forward decl
 void parse(char *instruction);
+void parse_utype(char *instruction);
 
 void init(registers_t *starting_registers)
 {
@@ -320,8 +321,6 @@ void parse(char *instruction)
     regex_extract(&instruction_ptr, &regex_ptr, rd_text, RD_TEXT_SIZE);
     insn_data->rd = get_register_loc(rd_text); // The first argument should always be a register
 
-    printf("Argument is: %s, %i\n", rd_text, insn_data->rd);
-
     regex_extract(&instruction_ptr, &regex_ptr, rs1_text, RS1_TEXT_SIZE);
     int rs1_try_parse = get_register_loc(rs1_text);
     if (rs1_try_parse == -1)
@@ -353,8 +352,6 @@ void parse_saveload(char *instruction)
     regex_extract(&instruction_ptr, &regex_ptr, rd_text, RD_TEXT_SIZE);
     insn_data->rd = get_register_loc(rd_text); // The first argument should always be a register
 
-    printf("Argument is: %s, %i\n", rd_text, insn_data->rd);
-
     regex_extract(&instruction_ptr, &regex_ptr, rs1_text, RS1_TEXT_SIZE);
     int rs1_try_parse = get_register_loc(rs1_text);
     if (rs1_try_parse == -1)
@@ -370,6 +367,27 @@ void parse_saveload(char *instruction)
         rs2_try_parse = (int)strtol(rs2_text, NULL, 0);
     }
     insn_data->rs1 = rs2_try_parse;
+}
+
+// regex: \s*()\s*,\s*()  (for U-type: lui rd, imm)
+void parse_utype(char *instruction)
+{
+    preprocess_replace_tab(instruction);
+
+    const char regex[] = " *() *, *()";
+    const char *regex_ptr = regex;
+    char *instruction_ptr = instruction;
+    regex_extract(&instruction_ptr, &regex_ptr, rd_text, RD_TEXT_SIZE);
+    insn_data->rd = get_register_loc(rd_text); // The first argument should always be a register
+
+    regex_extract(&instruction_ptr, &regex_ptr, rs1_text, RS1_TEXT_SIZE);
+    // For U-type, the second operand is always an immediate value
+    int imm_try_parse = get_register_loc(rs1_text);
+    if (imm_try_parse == -1)
+    {
+        imm_try_parse = (int)strtol(rs1_text, NULL, 0);
+    }
+    insn_data->upperimm = imm_try_parse;
 }
 
 int sra_portable(int a, int sh)
@@ -398,11 +416,9 @@ void step(char *instruction)
 
     // TODO: write logic for evaluating instruction on current interpreter state
 
-    // Reset register 0, in case it is overwritten.
-    registers->r[0] = 0;
-
     // Parse the instruction
     if (op_type == MEM_TYPE) parse_saveload(instruction);
+    else if (op_type == U_TYPE) parse_utype(instruction);
     else parse(instruction);
 
     if (op_type == R_TYPE)
@@ -414,6 +430,7 @@ void step(char *instruction)
         else if (strcmp("and", op) == 0) output = rs1 & rs2;
         else if (strcmp("or", op) == 0) output = rs1 | rs2;
         else if (strcmp("xor", op) == 0) output = rs1 ^ rs2;
+        else if (strcmp("nor", op) == 0) output = ~(rs1 | rs2);
         else if (strcmp("slt", op) == 0) output = rs1 < rs2;
         else if (strcmp("sll", op) == 0) output = rs1 << rs2;
         else if (strcmp("sra", op) == 0) output = sra_portable(rs1, rs2);
@@ -470,4 +487,7 @@ void step(char *instruction)
         int upperimm = insn_data->upperimm;
         registers->r[insn_data->rd] = upperimm << 12;
     }
+    
+    // Reset register 0, in case it is overwritten.
+    registers->r[0] = 0;
 }
